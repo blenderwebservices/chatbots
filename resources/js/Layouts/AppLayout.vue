@@ -64,6 +64,14 @@ const logout = () => {
                 >
                   Dashboard
                 </NavLink>
+                <NavLink
+                  :href="route('chatbots.index')"
+                  :active="
+                    route().current('chatbots.index')
+                  "
+                >
+                  Chatbots
+                </NavLink>
               </div>
             </div>
 
@@ -346,6 +354,12 @@ const logout = () => {
               :active="route().current('dashboard')"
             >
               Dashboard
+            </ResponsiveNavLink>
+            <ResponsiveNavLink
+              :href="route('chatbots.index')"
+              :active="route().current('chatbots.index')"
+            >
+              Chatbots
             </ResponsiveNavLink>
           </div>
 
