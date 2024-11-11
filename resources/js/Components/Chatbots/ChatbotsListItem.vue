@@ -2,6 +2,7 @@
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
 import DangerButton from '@/Components/DangerButton.vue'
+import dayjs from '@/Utils/dayjs'
 
 defineProps({
   chatbot: {
@@ -26,7 +27,7 @@ defineProps({
         <div
           class="text-sm text-gray-500 dark:text-gray-400"
         >
-          {{ chatbot.created_at }}
+          {{ dayjs(chatbot.created_at).fromNow() }}
         </div>
       </div>
       <div class="mt-4 flex space-x-2 md:mt-0">
