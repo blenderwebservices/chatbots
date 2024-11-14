@@ -31,7 +31,12 @@ defineProps({
         </div>
       </div>
       <div class="mt-4 flex space-x-2 md:mt-0">
-        <PrimaryButton>View</PrimaryButton>
+        <PrimaryButton
+          href="/chatbots/1"
+          aria-label="View Chatbot"
+        >
+          View
+        </PrimaryButton>
         <SecondaryButton>Edit</SecondaryButton>
         <DangerButton>Delete</DangerButton>
       </div>
