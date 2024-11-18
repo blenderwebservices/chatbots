@@ -37,8 +37,15 @@ defineProps({
         >
           View
         </PrimaryButton>
-        <SecondaryButton>Edit</SecondaryButton>
-        <DangerButton>Delete</DangerButton>
+        <SecondaryButton
+          href="/chatbots/1/edit"
+          aria-label="Edit Chatbot"
+        >
+          Edit
+        </SecondaryButton>
+        <DangerButton aria-label="Delete Chatbot">
+          Delete
+        </DangerButton>
       </div>
     </div>
   </section>
