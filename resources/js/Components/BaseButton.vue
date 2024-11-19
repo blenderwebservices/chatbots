@@ -27,7 +27,7 @@ const props = defineProps({
   },
 })
 const mergedClasses = computed(() =>
-  twMerge(props.defaultClasses, props.class)
+  twMerge('space-x-2', props.defaultClasses, props.class)
 )
 </script>
 
