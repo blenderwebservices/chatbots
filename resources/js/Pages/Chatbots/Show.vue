@@ -110,7 +110,7 @@ defineProps({
               <!-- Botones de acción -->
               <div class="mt-6 flex gap-3 md:mt-0">
                 <SecondaryButton
-                  href="#"
+                  :href="route('chatbots.edit', chatbot.id)"
                   aria-label="Edit Chatbot"
                 >
                   <PencilIcon class="size-3"></PencilIcon>
