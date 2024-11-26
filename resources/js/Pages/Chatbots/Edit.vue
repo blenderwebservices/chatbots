@@ -1,7 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { ArrowUturnLeftIcon } from '@heroicons/vue/24/solid'
 import FormSection from '@/Components/FormSection.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import ActionMessage from '@/Components/ActionMessage.vue'
