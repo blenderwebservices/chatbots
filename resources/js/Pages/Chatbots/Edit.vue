@@ -3,13 +3,26 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import FormSection from '@/Components/FormSection.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import ActionMessage from '@/Components/ActionMessage.vue'
+import ChatbotsForm from '@/Components/Chatbots/ChatbotsForm.vue'
+import { useForm } from '@inertiajs/vue3'
 
-defineProps({
+const props = defineProps({
   chatbot: {
     type: Object,
     required: true,
   },
 })
+
+const form = useForm({
+  name: props.chatbot.name,
+  system_prompt: props.chatbot.system_prompt,
+  model: props.chatbot.model,
+  temperature: String(props.chatbot.temperature),
+})
+
+const handleSubmit = () => {
+  form.put(route('chatbots.update', props.chatbot.id))
+}
 </script>
 
 <template>
@@ -23,12 +36,14 @@ defineProps({
     </template>
     <section class="py-6" aria-label="Editar Chatbot">
       <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <FormSection>
+        <FormSection @submitted="handleSubmit">
           <template #title> Editar Chatbot</template>
           <template #description>
             Edita la información del chatbot.
           </template>
-          <template #form>FORM FIELDS</template>
+          <template #form>
+            <ChatbotsForm :form="form" />
+          </template>
           <template #actions>
             <ActionMessage :on="false" class="me-3">
               Cambios guardados.
