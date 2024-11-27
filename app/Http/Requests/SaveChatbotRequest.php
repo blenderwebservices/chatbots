@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreChatbotRequest extends FormRequest
+class SaveChatbotRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreChatbotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'system_prompt' => ['required', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255'],
+            'temperature' => ['required', 'numeric', 'min:0', 'max:1'],
         ];
     }
 }
