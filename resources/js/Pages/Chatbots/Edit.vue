@@ -21,7 +21,9 @@ const form = useForm({
 })
 
 const handleSubmit = () => {
-  form.put(route('chatbots.update', props.chatbot.id))
+  form.put(route('chatbots.update', props.chatbot.id), {
+    preserveScroll: true,
+  })
 }
 </script>
 
@@ -45,15 +47,19 @@ const handleSubmit = () => {
             <ChatbotsForm :form="form" />
           </template>
           <template #actions>
-            <ActionMessage :on="false" class="me-3">
+            <ActionMessage
+              :on="form.recentlySuccessful"
+              class="me-3"
+            >
               Cambios guardados.
             </ActionMessage>
             <PrimaryButton
               aria-label="Guardar Cambios"
               :class="{
-                'cursor-not-allowed opacity-50': false,
+                'cursor-not-allowed opacity-50':
+                  form.processing,
               }"
-              :disabled="false"
+              :disabled="form.processing"
             >
               Guardar Cambios
             </PrimaryButton>
