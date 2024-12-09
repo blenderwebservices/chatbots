@@ -2,7 +2,6 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 import FormSection from '@/Components/FormSection.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
-import ActionMessage from '@/Components/ActionMessage.vue'
 import ChatbotsForm from '@/Components/Chatbots/ChatbotsForm.vue'
 import { createForm, store } from '@/Forms/chatbot.js'
 

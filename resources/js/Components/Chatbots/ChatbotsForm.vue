@@ -1,6 +1,7 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue'
 import TextInput from '@/Components/TextInput.vue'
+import TextArea from '@/Components/TextArea.vue'
 import InputError from '@/Components/InputError.vue'
 
 defineProps({
@@ -23,7 +24,7 @@ defineProps({
   </div>
   <div class="col-span-6 sm:col-span-4">
     <InputLabel for="system_prompt" value="System Prompt" />
-    <TextInput
+    <TextArea
       id="system_prompt"
       v-model="form.system_prompt"
       class="mt-1 block w-full"
