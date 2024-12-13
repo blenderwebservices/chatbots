@@ -2,6 +2,7 @@
 import InputLabel from '@/Components/InputLabel.vue'
 import TextInput from '@/Components/TextInput.vue'
 import TextArea from '@/Components/TextArea.vue'
+import SelectInput from '@/Components/SelectInput.vue'
 import InputError from '@/Components/InputError.vue'
 
 defineProps({
@@ -36,10 +37,19 @@ defineProps({
   </div>
   <div class="col-span-6 sm:col-span-4">
     <InputLabel for="model" value="Model" />
-    <TextInput
+    <SelectInput
       id="model"
       v-model="form.model"
       class="mt-1 block w-full"
+      placeholder="Select a model"
+      :options="[
+        { label: 'gpt-4o', value: 'gpt-4o' },
+        { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+        { label: 'gpt-4', value: 'gpt-4' },
+        { label: 'gpt-4-turbo', value: 'gpt-4-turbo' },
+        { label: 'gpt-3', value: 'gpt-3' },
+        { label: 'gpt-3-turbo', value: 'gpt-3-turbo' },
+      ]"
     />
     <InputError :message="form.errors.model" class="mt-2" />
   </div>
