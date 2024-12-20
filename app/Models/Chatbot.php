@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\ChatbotFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Chatbot extends Model
 {
-    /** @use HasFactory<\Database\Factories\ChatbotFactory> */
+    /** @use HasFactory<ChatbotFactory> */
     use HasFactory;
 
     use HasUuids;
@@ -17,5 +19,10 @@ class Chatbot extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function knowledgeSources(): HasMany
+    {
+        return $this->hasMany(KnowledgeSource::class);
     }
 }
