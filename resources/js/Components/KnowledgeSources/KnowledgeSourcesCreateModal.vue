@@ -1,5 +1,7 @@
 <script setup>
 import DialogModal from '@/Components/DialogModal.vue'
+import KnowledgeSourcesForm from '@/Components/KnowledgeSources/KnowledgeSourcesForm.vue'
+import { useForm } from '@inertiajs/vue3'
 
 const emit = defineEmits(['close'])
 
@@ -9,6 +11,13 @@ defineProps({
     required: true,
   },
 })
+
+const form = useForm({
+  name: '',
+  type: 'pdf',
+  pdf: null,
+  website: '',
+})
 </script>
 
 <template>
@@ -16,7 +25,9 @@ defineProps({
     <template #title>
       Agregar fuente de conocimiento
     </template>
-    <template #content>form fields</template>
+    <template #content>
+      <KnowledgeSourcesForm :form="form" />
+    </template>
     <template #footer>botones</template>
   </DialogModal>
 </template>
