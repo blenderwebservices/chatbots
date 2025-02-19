@@ -29,7 +29,7 @@ class KnowledgeSourceController extends Controller
      */
     public function store(StoreKnowledgeSourceRequest $request)
     {
-        //
+        dd($request->all());
     }
 
     /**

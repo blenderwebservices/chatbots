@@ -144,6 +144,7 @@ defineProps({
       </div>
       <KnowledgeSourcesCreateModal
         :show="showModal"
+        :chatbot-id="chatbot.id"
         @close="showModal = false"
       />
     </section>
