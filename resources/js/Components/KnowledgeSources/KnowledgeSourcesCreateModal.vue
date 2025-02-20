@@ -45,6 +45,7 @@ const handleSubmit = () => {
       Agregar fuente de conocimiento
     </template>
     <template #content>
+      <pre>{{ form.errors }}</pre>
       <KnowledgeSourcesForm :form="form" />
     </template>
     <template #footer>
