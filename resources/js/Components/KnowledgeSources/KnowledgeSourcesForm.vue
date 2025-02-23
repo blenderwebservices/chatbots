@@ -3,6 +3,7 @@ import InputLabel from '@/Components/InputLabel.vue'
 import TextInput from '@/Components/TextInput.vue'
 import InputError from '@/Components/InputError.vue'
 import SelectInput from '@/Components/SelectInput.vue'
+import FileInput from '@/Components/FileInput.vue'
 
 defineProps({
   form: Object,
@@ -46,11 +47,11 @@ const sourceTypes = [
       class="col-span-6 sm:col-span-4"
     >
       <InputLabel for="pdf" value="PDF" />
-      <TextInput
+      <FileInput
         id="pdf"
-        type="file"
         v-model="form.pdf"
         class="mt-1 block w-full"
+        accept="application/pdf"
       />
       <InputError :message="form.errors.pdf" class="mt-2" />
     </div>

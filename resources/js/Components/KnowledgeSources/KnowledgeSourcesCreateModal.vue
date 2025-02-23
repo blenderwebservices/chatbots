@@ -30,9 +30,11 @@ const handleSubmit = () => {
       chatbot: props.chatbotId,
     }),
     {
+      forceFormData: true,
       preserveScroll: true,
       onSuccess: () => {
         emit('close')
+        form.reset()
       },
     }
   )
@@ -45,7 +47,7 @@ const handleSubmit = () => {
       Agregar fuente de conocimiento
     </template>
     <template #content>
-      <pre>{{ form.errors }}</pre>
+      <pre>{{ form.data() }}</pre>
       <KnowledgeSourcesForm :form="form" />
     </template>
     <template #footer>
