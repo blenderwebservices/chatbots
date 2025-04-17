@@ -12,6 +12,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import { ref } from 'vue'
 import KnowledgeSourcesCreateModal from '@/Components/KnowledgeSources/KnowledgeSourcesCreateModal.vue'
+import KnowledgeSourcesListItem from '@/Components/KnowledgeSources/KnowledgeSourcesListItem.vue'
 
 const showModal = ref(false)
 
@@ -139,6 +140,18 @@ defineProps({
                 </PrimaryButton>
               </div>
             </div>
+          </section>
+        </div>
+        <div
+          class="mt-4 overflow-hidden rounded-lg shadow-lg"
+        >
+          <section
+            class="bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+          >
+            <KnowledgeSourcesListItem
+              v-for="knowledgeSource in chatbot.knowledge_sources"
+              :knowledge-source="knowledgeSource"
+            />
           </section>
         </div>
       </div>

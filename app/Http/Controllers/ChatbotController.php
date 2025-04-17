@@ -46,6 +46,8 @@ class ChatbotController extends Controller
      */
     public function show(Chatbot $chatbot)
     {
+        $chatbot->load('knowledgeSources');
+
         return Inertia::render('Chatbots/Show', [
             'chatbot' => $chatbot,
         ]);
