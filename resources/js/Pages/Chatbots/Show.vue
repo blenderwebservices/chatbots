@@ -149,6 +149,7 @@ defineProps({
             class="bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
           >
             <KnowledgeSourcesListItem
+              :key="knowledgeSource.id"
               v-for="knowledgeSource in chatbot.knowledge_sources"
               :knowledge-source="knowledgeSource"
             />
