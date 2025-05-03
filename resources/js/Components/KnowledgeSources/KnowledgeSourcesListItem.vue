@@ -6,6 +6,7 @@ import {
   ArrowPathIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/solid'
+import KnowledgeSourcesDeleteForm from '@/Components/KnowledgeSources/KnowledgeSourcesDeleteForm.vue'
 
 defineProps({
   knowledgeSource: Object,
@@ -58,7 +59,11 @@ defineProps({
       }}
     </div>
     <div class="col-span-1">
-      <XMarkIcon class="size-4 text-red-600" />
+      <KnowledgeSourcesDeleteForm
+        :knowledge-source="knowledgeSource"
+      >
+        <XMarkIcon class="size-4 text-red-600" />
+      </KnowledgeSourcesDeleteForm>
     </div>
   </div>
 </template>
