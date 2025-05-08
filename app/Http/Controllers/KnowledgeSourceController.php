@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreKnowledgeSourceRequest;
 use App\Http\Requests\UpdateKnowledgeSourceRequest;
+use App\Jobs\ProcessKnowledgeSourceJob;
 use App\Models\Chatbot;
 use App\Models\KnowledgeSource;
 use Illuminate\Support\Facades\Storage;
@@ -38,11 +39,14 @@ class KnowledgeSourceController extends Controller
             'type' => $validated['type'],
         ]);
 
-        $knowledgeSource->path = $validated['type'] === 'pdf'
-            ? $validated['pdf']->store('pdfs')
-            : $validated['website'];
+        $knowledgeSource->path = match ($validated['type']) {
+            'pdf' => $validated['pdf']->store('pdfs'),
+            'website' => $validated['website'],
+        };
 
         $chatbot->knowledgeSources()->save($knowledgeSource);
+
+        ProcessKnowledgeSourceJob::dispatch($knowledgeSource);
 
         return back();
     }

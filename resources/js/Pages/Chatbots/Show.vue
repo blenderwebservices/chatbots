@@ -143,6 +143,7 @@ defineProps({
           </section>
         </div>
         <div
+          v-if="chatbot.knowledge_sources.length > 0"
           class="mt-4 overflow-hidden rounded-lg shadow-lg"
         >
           <section
