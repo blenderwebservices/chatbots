@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, usePoll } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import {
   PencilIcon,
@@ -15,6 +15,8 @@ import KnowledgeSourcesCreateModal from '@/Components/KnowledgeSources/Knowledge
 import KnowledgeSourcesListItem from '@/Components/KnowledgeSources/KnowledgeSourcesListItem.vue'
 
 const showModal = ref(false)
+
+usePoll(5000)
 
 defineProps({
   chatbot: {
