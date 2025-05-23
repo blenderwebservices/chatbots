@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Actions\ExtractTextFromPdfAction;
+use App\Actions\ExtractTextFromWebsiteAction;
 use App\Models\KnowledgeSource;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -23,7 +24,7 @@ class ProcessKnowledgeSourceJob implements ShouldQueue
     {
         $extractedContent = match ($this->knowledgeSource->type) {
             'pdf' => (new ExtractTextFromPdfAction)->execute($this->knowledgeSource->path),
-            'website' => 'scraped website'
+            'website' => (new ExtractTextFromWebsiteAction)->execute($this->knowledgeSource->path),
         };
 
         $this->knowledgeSource->update([

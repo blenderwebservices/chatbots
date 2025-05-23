@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "spatie/pdf-to-text": "^1.54",
+        "symfony/dom-crawler": "^7.2",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
