@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chat;
+use App\Models\Chatbot;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,9 +12,12 @@ class ChatController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Chatbot $chatbot)
     {
-        //
+        return Inertia::render('Chats/Index', [
+            'chatbot' => $chatbot,
+            'chats' => $chatbot->chats,
+        ]);
     }
 
     /**
@@ -75,6 +79,9 @@ class ChatController extends Controller
      */
     public function destroy(Chat $chat)
     {
-        //
+        // The user owns chatbot
+        $chat->delete();
+
+        return back();
     }
 }

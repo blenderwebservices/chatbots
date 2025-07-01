@@ -125,18 +125,17 @@ defineProps({
                   <span>Edit</span>
                 </SecondaryButton>
                 <PrimaryButton
-                  method="POST"
                   :href="
-                    route('chats.store', {
-                      chatbot_id: chatbot.id,
+                    route('chats.index', {
+                      chatbot: chatbot.id,
                     })
                   "
-                  aria-label="Chat with Chatbot"
+                  aria-label="Chats"
                 >
                   <ChatBubbleBottomCenterIcon
                     class="size-3"
                   />
-                  <span>Chat</span>
+                  <span>Chats</span>
                 </PrimaryButton>
                 <PrimaryButton
                   aria-label="Agregar fuente de conocimiento"
