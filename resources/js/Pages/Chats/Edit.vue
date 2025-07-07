@@ -3,6 +3,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import TextInput from '@/Components/TextInput.vue'
 import { useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import ChatInput from '@/Components/Chats/ChatInput.vue'
 
 const props = defineProps({
   chat: Object,
@@ -47,6 +48,12 @@ const updateChatName = () => {
         {{ chat.name }}
       </h1>
     </template>
+    <div
+      class="flex h-[calc(100vh-140px)] flex-col bg-gray-50 dark:bg-gray-900"
+    >
+      <div class="flex-1 overflow-y-auto p-6"></div>
+      <ChatInput />
+    </div>
   </AppLayout>
 </template>
 
