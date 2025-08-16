@@ -6,6 +6,7 @@ use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
 use App\Models\Chat;
 use App\Models\Message;
+use Illuminate\Support\Facades\Http;
 
 class MessageController extends Controller
 {
@@ -35,6 +36,25 @@ class MessageController extends Controller
             'user_id' => $request->user()->id,
             'content' => $request->message,
         ]);
+
+        // Send message to OpenAI and get the response
+        // curl https://api.openai.com/v1/responses \
+        //  -H "Content-Type: application/json" \
+        //  -H "Authorization: Bearer $OPENAI_API_KEY" \
+        //  -d '{
+        //    "model": "gpt-5",
+        //    "input": "Write a short bedtime story about a unicorn."
+        //  }'
+
+        $res = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.config('services.openai.key'),
+        ])->post('https://api.openai.com/v1/responses', [
+            'model' => 'gpt-5-nano',
+            'input' => $request->message,
+        ])->json();
+
+        dd($res);
 
         return back();
     }
