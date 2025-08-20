@@ -6,7 +6,8 @@ use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
 use App\Models\Chat;
 use App\Models\Message;
-use OpenAI\Laravel\Facades\OpenAI;
+use Prism\Prism\Enums\Provider;
+use Prism\Prism\Prism;
 
 class MessageController extends Controller
 {
@@ -37,12 +38,10 @@ class MessageController extends Controller
             'content' => $request->message,
         ]);
 
-        $res = OpenAI::chat()->create([
-            'model' => 'gpt-5-nano',
-            'messages' => [
-                ['role' => 'user', 'content' => $request->message],
-            ],
-        ]);
+        $res = Prism::text()
+            ->using(Provider::OpenAI, 'gpt-5-nano')
+            ->withPrompt($request->message)
+            ->asText();
 
         dd($res);
 
