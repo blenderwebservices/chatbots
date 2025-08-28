@@ -114,37 +114,39 @@ defineProps({
                   </div>
                 </div>
               </div>
-
-              <!-- Botones de acción -->
-              <div class="mt-6 flex gap-3 md:mt-0">
-                <SecondaryButton
-                  :href="route('chatbots.edit', chatbot.id)"
-                  aria-label="Edit Chatbot"
-                >
-                  <PencilIcon class="size-3"></PencilIcon>
-                  <span>Edit</span>
-                </SecondaryButton>
-                <PrimaryButton
-                  :href="
-                    route('chats.index', {
-                      chatbot: chatbot.id,
-                    })
-                  "
-                  aria-label="Chats"
-                >
-                  <ChatBubbleBottomCenterIcon
-                    class="size-3"
-                  />
-                  <span>Chats</span>
-                </PrimaryButton>
-                <PrimaryButton
-                  aria-label="Agregar fuente de conocimiento"
-                  @click="showModal = true"
-                >
-                  <BookOpenIcon class="size-3" />
-                  <span>Conocimiento</span>
-                </PrimaryButton>
-              </div>
+            </div>
+            <!-- Botones de acción -->
+            <div
+              class="mt-6 flex gap-3 sm:justify-end md:mt-0"
+            >
+              <SecondaryButton
+                :href="route('chatbots.edit', chatbot.id)"
+                aria-label="Edit Chatbot"
+              >
+                <PencilIcon class="size-3"></PencilIcon>
+                <span>Edit</span>
+              </SecondaryButton>
+              <PrimaryButton
+                v-if="chatbot.knowledge_sources.length > 0"
+                :href="
+                  route('chats.index', {
+                    chatbot: chatbot.id,
+                  })
+                "
+                aria-label="Chats"
+              >
+                <ChatBubbleBottomCenterIcon
+                  class="size-3"
+                />
+                <span>Chats</span>
+              </PrimaryButton>
+              <PrimaryButton
+                aria-label="Agregar fuente de conocimiento"
+                @click="showModal = true"
+              >
+                <BookOpenIcon class="size-3" />
+                <span>Conocimiento</span>
+              </PrimaryButton>
             </div>
           </section>
         </div>

@@ -23,7 +23,7 @@ class SaveChatbotRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'system_prompt' => ['required', 'string', 'max:255'],
+            'system_prompt' => ['required', 'string', 'max:1000'],
             'model' => ['required', 'string', 'max:255'],
             'temperature' => ['required', 'numeric', 'min:0', 'max:1'],
         ];
