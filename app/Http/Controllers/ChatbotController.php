@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OpenAI;
 use App\Http\Requests\SaveChatbotRequest;
 use App\Models\Chatbot;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class ChatbotController extends Controller
     {
         return Inertia::render('Chatbots/Create', [
             'chatbot' => new Chatbot,
+            'models' => OpenAI::cases(),
         ]);
     }
 
@@ -60,6 +62,7 @@ class ChatbotController extends Controller
     {
         return Inertia::render('Chatbots/Edit', [
             'chatbot' => $chatbot,
+            'models' => OpenAI::cases(),
         ]);
     }
 

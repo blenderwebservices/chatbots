@@ -10,6 +10,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  models: {
+    type: Array,
+    required: true,
+  },
 })
 
 const form = createForm(props.chatbot)
@@ -36,7 +40,7 @@ const handleSubmit = () => {
             Crea un nuevo chatbot para tu aplicación.
           </template>
           <template #form>
-            <ChatbotsForm :form="form" />
+            <ChatbotsForm :form="form" :models="models" />
           </template>
           <template #actions>
             <PrimaryButton

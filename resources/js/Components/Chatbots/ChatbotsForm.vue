@@ -10,6 +10,10 @@ defineProps({
     type: Object,
     required: true,
   },
+  models: {
+    type: Array,
+    required: true,
+  },
 })
 </script>
 
@@ -42,10 +46,12 @@ defineProps({
       v-model="form.model"
       class="mt-1 block w-full"
       placeholder="Select a model"
-      :options="[
-        { label: 'gpt-5-nano', value: 'gpt-5-nano' },
-        { label: 'gpt-5-mini', value: 'gpt-5-mini' },
-      ]"
+      :options="
+        models.map(model => ({
+          label: model,
+          value: model,
+        }))
+      "
     />
     <InputError :message="form.errors.model" class="mt-2" />
   </div>
