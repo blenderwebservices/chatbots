@@ -38,8 +38,12 @@ class MessageController extends Controller
             'content' => $request->message,
         ]);
 
+        $chatbot = $chat->chatbot;
+
         $res = Prism::text()
-            ->using(Provider::OpenAI, 'gpt-5-nano')
+            ->using(Provider::OpenAI, $chatbot->model)
+            ->withSystemPrompt($chatbot->system_prompt)
+            ->usingTemperature($chatbot->temperature)
             ->withPrompt($request->message)
             ->asText();
 
