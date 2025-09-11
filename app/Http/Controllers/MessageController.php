@@ -39,10 +39,17 @@ class MessageController extends Controller
         ]);
 
         $chatbot = $chat->chatbot;
+        $systemPrompt = $chatbot->system_prompt;
+
+        $systemPrompt .= "\n\n";
+
+        $systemPrompt .= $chatbot->knowledgeSources
+            ->pluck('extracted_content')
+            ->join('\n\n');
 
         $res = Prism::text()
             ->using(Provider::OpenAI, $chatbot->model)
-            ->withSystemPrompt($chatbot->system_prompt)
+            ->withSystemPrompt($systemPrompt)
             ->usingTemperature($chatbot->temperature)
             ->withPrompt($request->message)
             ->asText();
