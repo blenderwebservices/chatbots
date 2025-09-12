@@ -54,7 +54,10 @@ class MessageController extends Controller
             ->withPrompt($request->message)
             ->asText();
 
-        dd($res);
+        $chat->messages()->create([
+            'role' => 'assistant',
+            'content' => $res->text,
+        ]);
 
         return back();
     }

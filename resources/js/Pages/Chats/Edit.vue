@@ -7,6 +7,7 @@ import ChatInput from '@/Components/Chats/ChatInput.vue'
 
 const props = defineProps({
   chat: Object,
+  messages: Array,
 })
 
 const editing = ref(false)
@@ -51,7 +52,16 @@ const updateChatName = () => {
     <div
       class="flex h-[calc(100vh-140px)] flex-col bg-gray-50 dark:bg-gray-900"
     >
-      <div class="flex-1 overflow-y-auto p-6"></div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <div
+          class="text-white"
+          v-if="messages.length > 0"
+          v-for="message in messages"
+          :key="message.id"
+        >
+          {{ message.content }}
+        </div>
+      </div>
       <ChatInput :chat="chat" />
     </div>
   </AppLayout>
