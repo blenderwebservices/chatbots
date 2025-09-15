@@ -4,6 +4,7 @@ import TextInput from '@/Components/TextInput.vue'
 import { useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import ChatInput from '@/Components/Chats/ChatInput.vue'
+import ChatMessage from '@/Components/Chats/ChatMessage.vue'
 
 const props = defineProps({
   chat: Object,
@@ -50,17 +51,17 @@ const updateChatName = () => {
       </h1>
     </template>
     <div
-      class="flex h-[calc(100vh-140px)] flex-col bg-gray-50 dark:bg-gray-900"
+      class="flex h-[calc(100vh-140px)] flex-col bg-gray-100 dark:bg-gray-900"
     >
       <div class="flex-1 overflow-y-auto p-6">
-        <div
-          class="text-white"
+        <ChatMessage
+          :message="message"
           v-if="messages.length > 0"
           v-for="message in messages"
           :key="message.id"
         >
           {{ message.content }}
-        </div>
+        </ChatMessage>
       </div>
       <ChatInput :chat="chat" />
     </div>
