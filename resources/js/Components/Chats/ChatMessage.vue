@@ -11,7 +11,7 @@ const isUser = props.message.role === 'user'
 
 <template>
   <div
-    class="flex"
+    class="flex w-full"
     :class="isUser ? 'justify-end' : 'justify-start'"
   >
     <div class="max-w-[50%] space-y-1">
@@ -34,5 +34,3 @@ const isUser = props.message.role === 'user'
     </div>
   </div>
 </template>
-
-<style scoped></style>
