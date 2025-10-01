@@ -57,7 +57,7 @@ class ChatController extends Controller
     {
         return Inertia::render('Chats/Edit', [
             'chat' => $chat,
-            'messages' => $chat->messages,
+            'messages' => $chat->messages()->oldest()->get(),
         ]);
     }
 

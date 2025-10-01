@@ -8,6 +8,8 @@ use App\Models\Chat;
 use App\Models\Message;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 class MessageController extends Controller
 {
@@ -47,11 +49,20 @@ class MessageController extends Controller
             ->pluck('extracted_content')
             ->join('\n\n');
 
+        $messages = $chat->messages()
+            ->oldest()
+            ->get()
+            ->map(fn ($message) => match ($message->role) {
+                'user' => new UserMessage($message->content),
+                'assistant' => new AssistantMessage($message->content),
+                default => throw new \Exception('Invalid message role'),
+            });
+
         $res = Prism::text()
             ->using(Provider::OpenAI, $chatbot->model)
             ->withSystemPrompt($systemPrompt)
             ->usingTemperature($chatbot->temperature)
-            ->withPrompt($request->message)
+            ->withMessages($messages->toArray())
             ->asText();
 
         $chat->messages()->create([
