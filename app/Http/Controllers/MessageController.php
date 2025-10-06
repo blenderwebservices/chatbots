@@ -8,8 +8,6 @@ use App\Models\Chat;
 use App\Models\Message;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
-use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 class MessageController extends Controller
 {
@@ -34,35 +32,19 @@ class MessageController extends Controller
      */
     public function store(Chat $chat, StoreMessageRequest $request)
     {
+        $chat->load('chatbot');
+
         $chat->messages()->create([
             'role' => 'user',
             'user_id' => $request->user()->id,
             'content' => $request->message,
         ]);
 
-        $chatbot = $chat->chatbot;
-        $systemPrompt = $chatbot->system_prompt;
-
-        $systemPrompt .= "\n\n";
-
-        $systemPrompt .= $chatbot->knowledgeSources
-            ->pluck('extracted_content')
-            ->join('\n\n');
-
-        $messages = $chat->messages()
-            ->oldest()
-            ->get()
-            ->map(fn ($message) => match ($message->role) {
-                'user' => new UserMessage($message->content),
-                'assistant' => new AssistantMessage($message->content),
-                default => throw new \Exception('Invalid message role'),
-            });
-
         $res = Prism::text()
-            ->using(Provider::OpenAI, $chatbot->model)
-            ->withSystemPrompt($systemPrompt)
-            ->usingTemperature($chatbot->temperature)
-            ->withMessages($messages->toArray())
+            ->using(Provider::OpenAI, $chat->chatbot->model)
+            ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
+            ->usingTemperature($chat->chatbot->temperature)
+            ->withMessages($chat->getPrismMessages())
             ->asText();
 
         $chat->messages()->create([

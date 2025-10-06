@@ -30,4 +30,17 @@ class Chatbot extends Model
     {
         return $this->hasMany(Chat::class);
     }
+
+    public function buildSystemPrompt(): string
+    {
+        $systemPrompt = $this->system_prompt;
+
+        $systemPrompt .= "\n\n";
+
+        $systemPrompt .= $this->knowledgeSources
+            ->pluck('extracted_content')
+            ->join('\n\n');
+
+        return $systemPrompt;
+    }
 }
