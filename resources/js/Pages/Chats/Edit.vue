@@ -8,6 +8,17 @@ const props = defineProps({
   chat: Object,
   messages: Array,
 })
+
+const sendMessage = message => {
+  props.messages.push({
+    content: message,
+    role: 'user',
+    created_at: new Date(),
+  })
+  // scroll
+  // enviar mensaje al chat
+  console.log(message)
+}
 </script>
 
 <template>
@@ -28,7 +39,7 @@ const props = defineProps({
           :key="message.id"
         />
       </div>
-      <ChatInput :chat="chat" />
+      <ChatInput @messageSent="sendMessage" :chat="chat" />
     </div>
   </AppLayout>
 </template>
