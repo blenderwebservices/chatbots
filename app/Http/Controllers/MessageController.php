@@ -40,19 +40,20 @@ class MessageController extends Controller
             'content' => $request->message,
         ]);
 
-        $res = Prism::text()
-            ->using(Provider::OpenAI, $chat->chatbot->model)
-            ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
-            ->usingTemperature($chat->chatbot->temperature)
-            ->withMessages($chat->getPrismMessages())
-            ->asText();
-
-        $chat->messages()->create([
-            'role' => 'assistant',
-            'content' => $res->text,
-        ]);
-
-        return back();
+        return response()->eventStream(function () use ($chat) {
+            return Prism::text()
+                ->using(Provider::OpenAI, $chat->chatbot->model)
+                ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
+                ->usingTemperature($chat->chatbot->temperature)
+                ->withMessages($chat->getPrismMessages())
+                ->onComplete(function ($pendingRequest, $messages) use ($chat) {
+                    $chat->messages()->create([
+                        'role' => 'assistant',
+                        'content' => $messages->first()->content,
+                    ]);
+                })
+                ->asStream();
+        });
     }
 
     /**
