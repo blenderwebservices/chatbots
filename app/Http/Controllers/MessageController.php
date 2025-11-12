@@ -7,7 +7,7 @@ use App\Http\Requests\UpdateMessageRequest;
 use App\Models\Chat;
 use App\Models\Message;
 use Prism\Prism\Enums\Provider;
-use Prism\Prism\Prism;
+use Prism\Prism\Facades\Prism;
 
 class MessageController extends Controller
 {

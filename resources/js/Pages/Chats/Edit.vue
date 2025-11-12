@@ -4,6 +4,7 @@ import ChatInput from '@/Components/Chats/ChatInput.vue'
 import ChatMessage from '@/Components/Chats/ChatMessage.vue'
 import ChatTitle from '@/Components/Chats/ChatTitle.vue'
 import { nextTick, useTemplateRef } from 'vue'
+import { useStream } from '@laravel/stream-vue'
 
 const props = defineProps({
   chat: Object,
@@ -16,6 +17,19 @@ const scrollToBottom = () => {
     behavior: 'smooth',
   })
 }
+const streamUrl = route('chats.messages.store', {
+  chat: props.chat.id,
+})
+
+const { send, isFetching, isStreaming } = useStream(
+  streamUrl,
+  {
+    onData: data => {
+      console.log({ data })
+    },
+  }
+)
+
 const sendMessage = async message => {
   props.messages.push({
     content: message,
@@ -26,7 +40,7 @@ const sendMessage = async message => {
   // scroll
   scrollToBottom()
   // enviar mensaje al chat
-  console.log(message)
+  send({ message })
 }
 </script>
 
@@ -35,6 +49,12 @@ const sendMessage = async message => {
     <template #header>
       <ChatTitle :chat="chat" />
     </template>
+    <div class="absolute bg-gray-900 text-white">
+      {{
+        isStreaming ? 'streaming ✅' : 'not streaming ❌'
+      }}
+      {{ isFetching ? 'fetching ✅' : 'not fetching ❌' }}
+    </div>
     <div
       class="flex h-[calc(100vh-140px)] flex-col bg-gray-100 dark:bg-gray-900"
     >
