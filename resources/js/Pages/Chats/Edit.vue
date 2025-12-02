@@ -3,14 +3,16 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import ChatInput from '@/Components/Chats/ChatInput.vue'
 import ChatMessage from '@/Components/Chats/ChatMessage.vue'
 import ChatTitle from '@/Components/Chats/ChatTitle.vue'
-import { nextTick, useTemplateRef } from 'vue'
+import { nextTick, ref, useTemplateRef } from 'vue'
 import { useStream } from '@laravel/stream-vue'
+import { createParser } from 'eventsource-parser'
 
 const props = defineProps({
   chat: Object,
   messages: Array,
 })
 const chatContainer = useTemplateRef('chatContainer')
+const assistantMessage = ref('')
 const scrollToBottom = () => {
   chatContainer.value.scrollTo({
     top: chatContainer.value.scrollHeight,
@@ -21,11 +23,23 @@ const streamUrl = route('chats.messages.store', {
   chat: props.chat.id,
 })
 
+const parser = createParser({
+  onEvent: event => {
+    const text = JSON.parse(event.data).delta
+    if (text !== undefined) {
+      assistantMessage.value += text
+    }
+  },
+})
+
 const { send, isFetching, isStreaming } = useStream(
   streamUrl,
   {
     onData: data => {
-      console.log({ data })
+      parser.feed(data)
+    },
+    onFinish: () => {
+      scrollToBottom()
     },
   }
 )
@@ -68,6 +82,12 @@ const sendMessage = async message => {
           v-for="message in messages"
           :key="message.id"
         />
+        <div
+          v-if="assistantMessage"
+          class="flex w-full justify-start dark:text-white"
+        >
+          {{ assistantMessage }}
+        </div>
       </div>
       <ChatInput @messageSent="sendMessage" :chat="chat" />
     </div>
