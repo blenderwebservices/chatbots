@@ -39,6 +39,12 @@ const { send, isFetching, isStreaming } = useStream(
       parser.feed(data)
     },
     onFinish: () => {
+      props.messages.push({
+        content: assistantMessage.value,
+        role: 'assistant',
+        created_at: new Date(),
+      })
+      assistantMessage.value = ''
       scrollToBottom()
     },
   }
@@ -82,12 +88,14 @@ const sendMessage = async message => {
           v-for="message in messages"
           :key="message.id"
         />
-        <div
+        <ChatMessage
           v-if="assistantMessage"
-          class="flex w-full justify-start dark:text-white"
-        >
-          {{ assistantMessage }}
-        </div>
+          :message="{
+            role: 'assistant',
+            content: assistantMessage,
+            created_at: new Date(),
+          }"
+        />
       </div>
       <ChatInput @messageSent="sendMessage" :chat="chat" />
     </div>
