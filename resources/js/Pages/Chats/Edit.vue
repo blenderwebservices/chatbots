@@ -14,6 +14,8 @@ const props = defineProps({
 const chatContainer = useTemplateRef('chatContainer')
 const assistantMessage = ref('')
 const scrollToBottom = () => {
+  chatContainer.value.style.paddingBottom =
+    'calc(100vh - 340px)'
   chatContainer.value.scrollTo({
     top: chatContainer.value.scrollHeight,
     behavior: 'smooth',
@@ -25,6 +27,9 @@ const streamUrl = route('chats.messages.store', {
 
 const parser = createParser({
   onEvent: event => {
+    if (event.data.includes('</stream>')) {
+      return
+    }
     const text = JSON.parse(event.data).delta
     if (text !== undefined) {
       assistantMessage.value += text
@@ -38,6 +43,9 @@ const { send, isFetching, isStreaming } = useStream(
     onData: data => {
       parser.feed(data)
     },
+    onError: error => {
+      console.error(error)
+    },
     onFinish: () => {
       props.messages.push({
         content: assistantMessage.value,
@@ -45,7 +53,6 @@ const { send, isFetching, isStreaming } = useStream(
         created_at: new Date(),
       })
       assistantMessage.value = ''
-      scrollToBottom()
     },
   }
 )
@@ -74,7 +81,7 @@ const sendMessage = async message => {
     >
       <div
         ref="chatContainer"
-        class="mx-auto max-w-7xl flex-1 overflow-y-auto p-6"
+        class="mx-auto max-w-7xl flex-1 space-y-4 overflow-y-auto p-6"
       >
         <ChatMessage
           :message="message"
