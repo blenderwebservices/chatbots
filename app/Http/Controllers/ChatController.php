@@ -32,7 +32,9 @@ class ChatController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Chats/Create', [
+            'chatbots' => Chatbot::latest()->get(),
+        ]);
     }
 
     /**

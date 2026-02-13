@@ -47,7 +47,7 @@ Route::middleware([
     Route::resource('providers', ProviderController::class);
     Route::resource('chatbots.knowledge-sources', KnowledgeSourceController::class);
     Route::get('chats/all', [ChatController::class, 'indexAll'])->name('chats.all');
-    Route::resource('chats', ChatController::class)->only(['store', 'edit', 'update', 'destroy']);
+    Route::resource('chats', ChatController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('chatbots/{chatbot}/chats', [ChatController::class, 'index'])
         ->name('chats.index');
 
