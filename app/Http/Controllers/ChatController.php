@@ -20,6 +20,13 @@ class ChatController extends Controller
         ]);
     }
 
+    public function indexAll(Request $request)
+    {
+        return Inertia::render('Chats/All', [
+            'chats' => $request->user()->chats()->with('chatbot')->latest()->get(),
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

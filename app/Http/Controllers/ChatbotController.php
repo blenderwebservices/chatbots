@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\OpenAI;
-use App\Http\Requests\SaveChatbotRequest;
 use App\Models\Chatbot;
+use App\Models\LlmModel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,18 +26,25 @@ class ChatbotController extends Controller
     {
         return Inertia::render('Chatbots/Create', [
             'chatbot' => new Chatbot,
-            'models' => OpenAI::cases(),
+            'models' => LlmModel::where('active', true)->get(),
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SaveChatbotRequest $request)
+    public function store(Request $request)
     {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'system_prompt' => 'required|string',
+            'model' => 'required|string',
+            'temperature' => 'required|numeric|min:0|max:2',
+        ]);
+
         $chatbot = $request->user()
             ->chatbots()
-            ->create($request->validated());
+            ->create($validated);
 
         return to_route('chatbots.show', $chatbot);
     }
@@ -62,16 +68,23 @@ class ChatbotController extends Controller
     {
         return Inertia::render('Chatbots/Edit', [
             'chatbot' => $chatbot,
-            'models' => OpenAI::cases(),
+            'models' => LlmModel::where('active', true)->get(),
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(SaveChatbotRequest $request, Chatbot $chatbot)
+    public function update(Request $request, Chatbot $chatbot)
     {
-        $chatbot->update($request->validated());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'system_prompt' => 'required|string',
+            'model' => 'required|string',
+            'temperature' => 'required|numeric|min:0|max:2',
+        ]);
+
+        $chatbot->update($validated);
 
         return back();
     }

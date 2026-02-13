@@ -48,8 +48,8 @@ defineProps({
       placeholder="Select a model"
       :options="
         models.map(model => ({
-          label: model,
-          value: model,
+          label: model.name,
+          value: model.identifier,
         }))
       "
     />
