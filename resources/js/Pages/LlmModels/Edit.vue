@@ -15,6 +15,7 @@ const props = defineProps({
 const form = useForm({
   name: props.llmModel.name,
   identifier: props.llmModel.identifier,
+  api_key: props.llmModel.api_key || '',
   provider_id: props.llmModel.provider_id,
   active: props.llmModel.active,
 })
@@ -57,6 +58,19 @@ const submit = () => {
             required
           />
           <InputError class="mt-2" :message="form.errors.identifier" />
+        </div>
+
+        <div>
+          <InputLabel for="api_key" value="API Key" />
+          <TextInput
+            id="api_key"
+            v-model="form.api_key"
+            type="password"
+            class="mt-1 block w-full"
+            placeholder="Introduce la clave de API"
+          />
+          <InputError class="mt-2" :message="form.errors.api_key" />
+          <p class="mt-1 text-xs text-gray-500">La clave privada para autenticar con el proveedor.</p>
         </div>
 
         <div>

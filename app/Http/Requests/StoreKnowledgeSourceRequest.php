@@ -23,6 +23,7 @@ class StoreKnowledgeSourceRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'chatbot_id' => ['sometimes', 'required', 'exists:chatbots,id'],
             'type' => ['required', 'string', 'in:pdf,website'],
             'pdf' => ['required_if:type,pdf', 'exclude_if:type,website', 'file', 'mimes:pdf', 'max:10240'],
             'website' => ['required_if:type,website', 'exclude_if:type,pdf', 'url'],

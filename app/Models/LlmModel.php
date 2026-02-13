@@ -13,6 +13,7 @@ class LlmModel extends Model
     protected $fillable = [
         'name',
         'identifier',
+        'api_key',
         'provider', // Keep for backward compatibility during migration
         'provider_id',
         'active',

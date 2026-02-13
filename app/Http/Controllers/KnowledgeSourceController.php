@@ -8,6 +8,7 @@ use App\Jobs\ProcessKnowledgeSourceJob;
 use App\Models\Chatbot;
 use App\Models\KnowledgeSource;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class KnowledgeSourceController extends Controller
 {
@@ -16,7 +17,10 @@ class KnowledgeSourceController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('KnowledgeSources/Index', [
+            'knowledgeSources' => KnowledgeSource::with('chatbot')->latest()->get(),
+            'chatbots' => Chatbot::latest()->get(),
+        ]);
     }
 
     /**
@@ -24,19 +28,28 @@ class KnowledgeSourceController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('KnowledgeSources/Create', [
+            'chatbots' => Chatbot::latest()->get(),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Chatbot $chatbot, StoreKnowledgeSourceRequest $request)
+    public function store(StoreKnowledgeSourceRequest $request, ?Chatbot $chatbot = null)
     {
         $validated = $request->validated();
+
+        $chatbotId = $chatbot?->id ?? $validated['chatbot_id'] ?? null;
+
+        if (!$chatbotId) {
+            return back()->withErrors(['chatbot_id' => 'Debe seleccionar un chatbot.']);
+        }
 
         $knowledgeSource = new KnowledgeSource([
             'name' => $validated['name'],
             'type' => $validated['type'],
+            'chatbot_id' => $chatbotId,
         ]);
 
         $knowledgeSource->path = match ($validated['type']) {
@@ -44,11 +57,15 @@ class KnowledgeSourceController extends Controller
             'website' => $validated['website'],
         };
 
-        $chatbot->knowledgeSources()->save($knowledgeSource);
+        $knowledgeSource->save();
 
         ProcessKnowledgeSourceJob::dispatch($knowledgeSource);
 
-        return back();
+        if ($request->header('X-Inertia-Partial-Component')) {
+            return back()->with('flash.banner', 'Fuente agregada.');
+        }
+
+        return to_route('knowledge-sources.index')->with('flash.banner', 'Fuente agregada.');
     }
 
     /**
@@ -59,7 +76,8 @@ class KnowledgeSourceController extends Controller
         if ($knowledgeSource->type === 'pdf') {
             return Storage::response(
                 $knowledgeSource->path,
-                $knowledgeSource->name, [
+                $knowledgeSource->name,
+                [
                     'Content-Type' => 'application/pdf',
                     'Content-Disposition' => 'inline',
                 ]
@@ -74,7 +92,10 @@ class KnowledgeSourceController extends Controller
      */
     public function edit(KnowledgeSource $knowledgeSource)
     {
-        //
+        return Inertia::render('KnowledgeSources/Edit', [
+            'knowledgeSource' => $knowledgeSource,
+            'chatbots' => Chatbot::latest()->get(),
+        ]);
     }
 
     /**
@@ -82,7 +103,14 @@ class KnowledgeSourceController extends Controller
      */
     public function update(UpdateKnowledgeSourceRequest $request, KnowledgeSource $knowledgeSource)
     {
-        //
+        $validated = $request->validated();
+
+        $knowledgeSource->update([
+            'name' => $validated['name'],
+            'chatbot_id' => $validated['chatbot_id'] ?? $knowledgeSource->chatbot_id,
+        ]);
+
+        return to_route('knowledge-sources.index')->with('flash.banner', 'Fuente de conocimiento actualizada.');
     }
 
     /**
@@ -93,7 +121,7 @@ class KnowledgeSourceController extends Controller
         // authorization
         $deleted = $knowledgeSource->delete();
 
-        if (! $deleted) {
+        if (!$deleted) {
             return back()->with('flash', [
                 'banner' => 'Hubo un problema al eliminar la fuente de conocimiento.',
                 'bannerStyle' => 'danger',

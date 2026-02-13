@@ -66,6 +66,8 @@ class ChatbotController extends Controller
      */
     public function edit(Chatbot $chatbot)
     {
+        $chatbot->load('knowledgeSources');
+
         return Inertia::render('Chatbots/Edit', [
             'chatbot' => $chatbot,
             'models' => LlmModel::where('active', true)->get(),

@@ -36,6 +36,7 @@ class LlmModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'identifier' => 'required|string|max:255',
+            'api_key' => 'nullable|string',
             'provider_id' => 'required|exists:providers,id',
             'active' => 'boolean',
         ]);
@@ -67,6 +68,7 @@ class LlmModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'identifier' => 'required|string|max:255',
+            'api_key' => 'nullable|string',
             'provider_id' => 'required|exists:providers,id',
             'active' => 'boolean',
         ]);

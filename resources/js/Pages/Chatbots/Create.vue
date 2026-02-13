@@ -41,6 +41,14 @@ const handleSubmit = () => {
           </template>
           <template #form>
             <ChatbotsForm :form="form" :models="models" />
+            <div class="col-span-6 mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800">
+                <p class="text-sm text-indigo-700 dark:text-indigo-300 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Podrás agregar fuentes de conocimiento (PDFs y URLs) una vez que hayas creado el chatbot.
+                </p>
+            </div>
           </template>
           <template #actions>
             <PrimaryButton
