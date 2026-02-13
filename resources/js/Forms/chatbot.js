@@ -5,6 +5,7 @@ export const createForm = (chatbot = {}) =>
     name: chatbot.name,
     system_prompt: chatbot.system_prompt,
     model: chatbot.model,
+    llm_model_id: chatbot.llm_model_id,
     temperature: String(chatbot.temperature),
   })
 

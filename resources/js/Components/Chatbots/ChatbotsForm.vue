@@ -40,20 +40,20 @@ defineProps({
     />
   </div>
   <div class="col-span-6 sm:col-span-4">
-    <InputLabel for="model" value="Model" />
+    <InputLabel for="llm_model_id" value="Model" />
     <SelectInput
-      id="model"
-      v-model="form.model"
+      id="llm_model_id"
+      v-model="form.llm_model_id"
       class="mt-1 block w-full"
       placeholder="Select a model"
       :options="
         models.map(model => ({
           label: model.name,
-          value: model.identifier,
+          value: model.id,
         }))
       "
     />
-    <InputError :message="form.errors.model" class="mt-2" />
+    <InputError :message="form.errors.llm_model_id" class="mt-2" />
   </div>
   <div class="col-span-6 sm:col-span-4">
     <InputLabel for="model" value="Temperatura" />

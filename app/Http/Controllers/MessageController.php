@@ -32,7 +32,7 @@ class MessageController extends Controller
      */
     public function store(Chat $chat, StoreMessageRequest $request)
     {
-        $chat->load('chatbot');
+        $chat->load('chatbot.llmModel.providerRelation');
 
         $chat->messages()->create([
             'role' => 'user',
@@ -40,9 +40,26 @@ class MessageController extends Controller
             'content' => $request->message,
         ]);
 
-        return response()->eventStream(function () use ($chat) {
+        $llmModel = $chat->chatbot->llmModel;
+
+        if (!$llmModel) {
+            throw new \Exception('No LLM model configured for this chatbot');
+        }
+
+        $providerIdentifier = $llmModel->providerRelation->identifier;
+
+        // Map internal provider identifiers to Prism Provider enum values
+        $provider = match ($providerIdentifier) {
+            'google' => Provider::Gemini,
+            'microsoft' => Provider::OpenAI, // Prism doesn't have a direct Microsoft provider, typically used via OpenAI-compatible API
+            default => Provider::from($providerIdentifier),
+        };
+
+        return response()->eventStream(function () use ($chat, $llmModel, $provider) {
             return Prism::text()
-                ->using(Provider::OpenAI, $chat->chatbot->model)
+                ->using($provider, $llmModel->identifier, [
+                    'api_key' => $llmModel->api_key,
+                ])
                 ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
                 ->usingTemperature($chat->chatbot->temperature)
                 ->withMessages($chat->getPrismMessages())

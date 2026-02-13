@@ -16,6 +16,14 @@ class Chatbot extends Model
 
     use HasUuids;
 
+    protected $fillable = [
+        'name',
+        'system_prompt',
+        'model',
+        'llm_model_id',
+        'temperature',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -29,6 +37,11 @@ class Chatbot extends Model
     public function chats(): HasMany
     {
         return $this->hasMany(Chat::class);
+    }
+
+    public function llmModel(): BelongsTo
+    {
+        return $this->belongsTo(LlmModel::class);
     }
 
     public function buildSystemPrompt(): string

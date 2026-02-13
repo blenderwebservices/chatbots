@@ -39,6 +39,7 @@ class ChatbotController extends Controller
             'name' => 'required|string|max:255',
             'system_prompt' => 'required|string',
             'model' => 'required|string',
+            'llm_model_id' => 'required|exists:llm_models,id',
             'temperature' => 'required|numeric|min:0|max:2',
         ]);
 
@@ -83,6 +84,7 @@ class ChatbotController extends Controller
             'name' => 'required|string|max:255',
             'system_prompt' => 'required|string',
             'model' => 'required|string',
+            'llm_model_id' => 'required|exists:llm_models,id',
             'temperature' => 'required|numeric|min:0|max:2',
         ]);
 
