@@ -6,15 +6,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class LlmModel extends Model
+class Provider extends Model
 {
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
         'name',
         'identifier',
-        'provider', // Keep for backward compatibility during migration
-        'provider_id',
         'active',
     ];
 
@@ -25,8 +23,8 @@ class LlmModel extends Model
         ];
     }
 
-    public function providerRelation()
+    public function llmModels()
     {
-        return $this->belongsTo(Provider::class, 'provider_id');
+        return $this->hasMany(LlmModel::class);
     }
 }

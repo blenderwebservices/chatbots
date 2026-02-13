@@ -7,10 +7,14 @@ import InputError from '@/Components/InputError.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import Checkbox from '@/Components/Checkbox.vue'
 
+const props = defineProps({
+  providers: Array,
+})
+
 const form = useForm({
   name: '',
   identifier: '',
-  provider: 'openai',
+  provider_id: '',
   active: true,
 })
 
@@ -58,17 +62,19 @@ const submit = () => {
         </div>
 
         <div>
-          <InputLabel for="provider" value="Proveedor" />
+          <InputLabel for="provider_id" value="Proveedor" />
           <select
-            id="provider"
-            v-model="form.provider"
+            id="provider_id"
+            v-model="form.provider_id"
             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+            required
           >
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="other">Otro</option>
+            <option value="" disabled>Seleccione un proveedor</option>
+            <option v-for="provider in providers" :key="provider.id" :value="provider.id">
+              {{ provider.name }}
+            </option>
           </select>
-          <InputError class="mt-2" :message="form.errors.provider" />
+          <InputError class="mt-2" :message="form.errors.provider_id" />
         </div>
 
         <div class="block">

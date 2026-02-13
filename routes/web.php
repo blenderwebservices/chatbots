@@ -4,6 +4,7 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\KnowledgeSourceController;
 use App\Http\Controllers\LlmModelController;
+use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,15 +26,15 @@ Route::middleware([
 ])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        
+
         return Inertia::render('Dashboard', [
             'recentChatbots' => $user->chatbots()->latest()->limit(5)->get(),
             'stats' => [
                 'totalChatbots' => $user->chatbots()->count(),
-                'totalMessages' => \App\Models\Message::whereHas('chat', function($q) use ($user) {
+                'totalMessages' => \App\Models\Message::whereHas('chat', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->count(),
-                'totalKnowledgeSources' => \App\Models\KnowledgeSource::whereHas('chatbot', function($q) use ($user) {
+                'totalKnowledgeSources' => \App\Models\KnowledgeSource::whereHas('chatbot', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->count(),
                 'totalLlmModels' => \App\Models\LlmModel::where('active', true)->count(),
@@ -43,6 +44,7 @@ Route::middleware([
 
     Route::resource('chatbots', ChatbotController::class);
     Route::resource('llm-models', LlmModelController::class);
+    Route::resource('providers', ProviderController::class);
     Route::resource('chatbots.knowledge-sources', KnowledgeSourceController::class);
     Route::get('chats/all', [ChatController::class, 'indexAll'])->name('chats.all');
     Route::resource('chats', ChatController::class)->only(['store', 'edit', 'update', 'destroy']);

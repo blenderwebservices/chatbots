@@ -14,7 +14,7 @@ class LlmModelController extends Controller
     public function index()
     {
         return Inertia::render('LlmModels/Index', [
-            'llmModels' => LlmModel::latest()->get(),
+            'llmModels' => LlmModel::with('providerRelation')->latest()->get(),
         ]);
     }
 
@@ -23,7 +23,9 @@ class LlmModelController extends Controller
      */
     public function create()
     {
-        return Inertia::render('LlmModels/Create');
+        return Inertia::render('LlmModels/Create', [
+            'providers' => \App\Models\Provider::where('active', true)->orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -34,9 +36,12 @@ class LlmModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'identifier' => 'required|string|max:255',
-            'provider' => 'required|string|max:255',
+            'provider_id' => 'required|exists:providers,id',
             'active' => 'boolean',
         ]);
+
+        $provider = \App\Models\Provider::find($validated['provider_id']);
+        $validated['provider'] = $provider->identifier; // Kept for BC for now
 
         LlmModel::create($validated);
 
@@ -50,6 +55,7 @@ class LlmModelController extends Controller
     {
         return Inertia::render('LlmModels/Edit', [
             'llmModel' => $llmModel,
+            'providers' => \App\Models\Provider::where('active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -61,9 +67,12 @@ class LlmModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'identifier' => 'required|string|max:255',
-            'provider' => 'required|string|max:255',
+            'provider_id' => 'required|exists:providers,id',
             'active' => 'boolean',
         ]);
+
+        $provider = \App\Models\Provider::find($validated['provider_id']);
+        $validated['provider'] = $provider->identifier; // Kept for BC for now
 
         $llmModel->update($validated);
 
