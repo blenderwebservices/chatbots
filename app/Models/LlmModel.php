@@ -22,6 +22,7 @@ class LlmModel extends Model
     protected function casts(): array
     {
         return [
+            'api_key' => 'encrypted',
             'active' => 'boolean',
         ];
     }
