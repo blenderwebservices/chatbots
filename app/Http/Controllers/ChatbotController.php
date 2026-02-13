@@ -38,10 +38,12 @@ class ChatbotController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'system_prompt' => 'required|string',
-            'model' => 'required|string',
             'llm_model_id' => 'required|exists:llm_models,id',
             'temperature' => 'required|numeric|min:0|max:2',
         ]);
+
+        $llmModel = LlmModel::findOrFail($validated['llm_model_id']);
+        $validated['model'] = $llmModel->identifier;
 
         $chatbot = $request->user()
             ->chatbots()
@@ -83,10 +85,12 @@ class ChatbotController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'system_prompt' => 'required|string',
-            'model' => 'required|string',
             'llm_model_id' => 'required|exists:llm_models,id',
             'temperature' => 'required|numeric|min:0|max:2',
         ]);
+
+        $llmModel = LlmModel::findOrFail($validated['llm_model_id']);
+        $validated['model'] = $llmModel->identifier;
 
         $chatbot->update($validated);
 
