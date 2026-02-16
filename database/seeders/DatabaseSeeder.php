@@ -16,13 +16,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->withPersonalTeam()->create();
 
-        User::factory()
-            ->withPersonalTeam()
-            //            ->hasChatbots(2)
-            ->create([
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
                 'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->call([
             LlmModelSeeder::class,

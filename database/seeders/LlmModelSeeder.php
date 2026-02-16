@@ -69,13 +69,25 @@ class LlmModelSeeder extends Seeder
         foreach ($models as $modelData) {
             $provider = \App\Models\Provider::where('identifier', $modelData['provider'])->first();
 
+            // Set base_url based on provider
+            $baseUrl = match ($modelData['provider']) {
+                'openai' => 'https://api.openai.com/v1',
+                'anthropic' => 'https://api.anthropic.com/v1',
+                'google' => 'https://generativelanguage.googleapis.com/v1beta',
+                'groq' => 'https://api.groq.com/openai/v1',
+                'xai' => 'https://api.x.ai/v1',
+                'microsoft' => 'https://api.openai.com/v1', // Microsoft uses OpenAI-compatible API
+                default => null,
+            };
+
             \App\Models\LlmModel::updateOrCreate(
                 ['identifier' => $modelData['identifier']],
                 [
                     'name' => $modelData['name'],
                     'provider_id' => $provider->id,
                     'provider' => $modelData['provider'],
-                    'active' => true
+                    'active' => true,
+                    'configuration' => $baseUrl ? ['base_url' => $baseUrl] : null,
                 ]
             );
         }

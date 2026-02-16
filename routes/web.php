@@ -44,6 +44,7 @@ Route::middleware([
 
     Route::resource('chatbots', ChatbotController::class);
     Route::resource('llm-models', LlmModelController::class);
+    Route::post('llm-models/check', [LlmModelController::class, 'check'])->name('llm-models.check');
     Route::resource('providers', ProviderController::class);
     Route::resource('chatbots.knowledge-sources', KnowledgeSourceController::class);
     Route::resource('knowledge-sources', KnowledgeSourceController::class);

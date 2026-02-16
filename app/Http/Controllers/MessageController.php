@@ -51,15 +51,18 @@ class MessageController extends Controller
         // Map internal provider identifiers to Prism Provider enum values
         $provider = match ($providerIdentifier) {
             'google' => Provider::Gemini,
-            'microsoft' => Provider::OpenAI, // Prism doesn't have a direct Microsoft provider, typically used via OpenAI-compatible API
-            default => Provider::from($providerIdentifier),
+            'microsoft' => Provider::OpenAI,
+            default => Provider::tryFrom($providerIdentifier) ?? Provider::OpenAI,
         };
 
-        return response()->eventStream(function () use ($chat, $llmModel, $provider) {
-            return Prism::text()
-                ->using($provider, $llmModel->identifier, [
+        $config = $llmModel->configuration ?? [];
+
+        return response()->eventStream(function () use ($chat, $llmModel, $provider, $config) {
+            $prismRequest = Prism::text()
+                ->using($provider, $llmModel->identifier, array_filter([
                     'api_key' => $llmModel->api_key,
-                ])
+                    'url' => $config['base_url'] ?? null,
+                ]))
                 ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
                 ->usingTemperature($chat->chatbot->temperature)
                 ->withMessages($chat->getPrismMessages())
@@ -68,8 +71,9 @@ class MessageController extends Controller
                         'role' => 'assistant',
                         'content' => $messages->first()->content,
                     ]);
-                })
-                ->asStream();
+                });
+
+            return $prismRequest->asStream();
         });
     }
 

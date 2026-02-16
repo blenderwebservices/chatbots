@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { useForm, Link } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import TextInput from '@/Components/TextInput.vue'
 import InputError from '@/Components/InputError.vue'
@@ -18,7 +19,55 @@ const form = useForm({
   api_key: props.llmModel.api_key || '',
   provider_id: props.llmModel.provider_id,
   active: props.llmModel.active,
+  configuration: props.llmModel.configuration || { base_url: '' },
 })
+
+const checkStatus = ref(null)
+const checkMessage = ref('')
+const isChecking = ref(false)
+
+const checkConnection = async () => {
+  if (!form.api_key) {
+    checkStatus.value = 'error'
+    checkMessage.value = 'Por favor, introduce una API Key'
+    return
+  }
+
+  isChecking.value = true
+  checkStatus.value = null
+  checkMessage.value = ''
+
+  try {
+    const response = await fetch(route('llm-models.check'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      },
+      body: JSON.stringify({
+        api_key: form.api_key,
+        identifier: form.identifier,
+        provider_id: form.provider_id,
+        configuration: form.configuration,
+      }),
+    })
+
+    const data = await response.json()
+    
+    if (data.status === 'success') {
+      checkStatus.value = 'success'
+      checkMessage.value = data.message
+    } else {
+      checkStatus.value = 'error'
+      checkMessage.value = data.message
+    }
+  } catch (error) {
+    checkStatus.value = 'error'
+    checkMessage.value = 'Error al verificar la conexión'
+  } finally {
+    isChecking.value = false
+  }
+}
 
 const submit = () => {
   form.put(route('llm-models.update', props.llmModel.id))
@@ -74,6 +123,19 @@ const submit = () => {
         </div>
 
         <div>
+          <InputLabel for="base_url" value="Base URL (Opcional)" />
+          <TextInput
+            id="base_url"
+            v-model="form.configuration.base_url"
+            type="text"
+            class="mt-1 block w-full"
+            placeholder="Ej: https://api.openai.com/v1"
+          />
+          <InputError class="mt-2" :message="form.errors['configuration.base_url']" />
+          <p class="mt-1 text-xs text-gray-500">URL base personalizada para proveedores genéricos o compatibles.</p>
+        </div>
+
+        <div>
           <InputLabel for="provider_id" value="Proveedor" />
           <select
             id="provider_id"
@@ -89,6 +151,22 @@ const submit = () => {
           <InputError class="mt-2" :message="form.errors.provider_id" />
         </div>
 
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <button
+            type="button"
+            @click="checkConnection"
+            :disabled="!form.api_key || isChecking"
+            class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50"
+          >
+            <span v-if="isChecking">Verificando...</span>
+            <span v-else>Verificar Conexión</span>
+          </button>
+
+          <div v-if="checkStatus" class="mt-3 p-3 rounded-lg" :class="checkStatus === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'">
+            <p class="text-sm font-medium">{{ checkMessage }}</p>
+          </div>
+        </div>
+
         <div class="block">
           <label class="flex items-center">
             <Checkbox v-model:checked="form.active" name="active" />
@@ -98,7 +176,10 @@ const submit = () => {
 
         <div class="flex items-center justify-end">
           <Link :href="route('llm-models.index')" class="mr-4 text-sm text-gray-600 hover:text-gray-900 underline">Cancelar</Link>
-          <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+          <PrimaryButton 
+            :class="{ 'opacity-25': form.processing || (!form.api_key) }" 
+            :disabled="form.processing || (!form.api_key)"
+          >
             Actualizar Modelo
           </PrimaryButton>
         </div>

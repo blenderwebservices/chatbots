@@ -38,6 +38,7 @@ const deleteModel = (id) => {
               <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Identificador</th>
               <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Proveedor</th>
               <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Conexión</th>
               <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
@@ -63,13 +64,35 @@ const deleteModel = (id) => {
                   {{ model.active ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <span 
+                    v-if="model.last_check_status === 'success'"
+                    class="inline-block w-3 h-3 bg-green-500 rounded-full"
+                    title="Conexión exitosa"
+                  ></span>
+                  <span 
+                    v-else-if="model.last_check_status === 'failed'"
+                    class="inline-block w-3 h-3 bg-red-500 rounded-full"
+                    title="Conexión fallida"
+                  ></span>
+                  <span 
+                    v-else
+                    class="inline-block w-3 h-3 bg-gray-400 rounded-full"
+                    title="No verificado"
+                  ></span>
+                  <span v-if="model.last_check_at" class="ml-2 text-xs text-gray-500">
+                    {{ new Date(model.last_check_at).toLocaleDateString() }}
+                  </span>
+                </div>
+              </td>
               <td class="px-6 py-4 space-x-3">
                 <Link :href="route('llm-models.edit', model.id)" class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</Link>
                 <button @click="deleteModel(model.id)" class="text-red-600 hover:text-red-900 font-medium">Eliminar</button>
               </td>
             </tr>
             <tr v-if="llmModels.length === 0">
-              <td colspan="5" class="px-6 py-10 text-center text-gray-500">No hay modelos registrados aún.</td>
+              <td colspan="6" class="px-6 py-10 text-center text-gray-500">No hay modelos registrados aún.</td>
             </tr>
           </tbody>
         </table>

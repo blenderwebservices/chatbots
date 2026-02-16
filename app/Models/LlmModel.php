@@ -17,6 +17,9 @@ class LlmModel extends Model
         'provider', // Keep for backward compatibility during migration
         'provider_id',
         'active',
+        'last_check_status',
+        'last_check_at',
+        'configuration',
     ];
 
     protected function casts(): array
@@ -24,6 +27,8 @@ class LlmModel extends Model
         return [
             'api_key' => 'encrypted',
             'active' => 'boolean',
+            'last_check_at' => 'datetime',
+            'configuration' => 'array',
         ];
     }
 
