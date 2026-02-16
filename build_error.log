@@ -1,0 +1,29 @@
+
+> build
+> vite build
+
+vite v4.5.14 building for production...
+transforming...
+resources/js/Pages/Chatbots/Show.vue (38:15) Error when using sourcemap for reporting an error: Can't resolve original location of error.
+✓ 900 modules transformed.
+✓ built in 10.28s
+"usePoll" is not exported by "node_modules/@inertiajs/vue3/dist/index.esm.js", imported by "resources/js/Pages/Chatbots/Show.vue".
+file: /Users/franc/Herd/chatbots/resources/js/Pages/Chatbots/Show.vue:38:15
+36: const _hoisted_28 = /*#__PURE__*/_createElementVNode("h2", { class: "mb-6 text-xl font-extrabold leading-5 text-gray-...
+37: 
+38: import { Link, usePoll } from '@inertiajs/vue3'
+                   ^
+39: import AppLayout from '@/Layouts/AppLayout.vue'
+40: import {
+error during build:
+RollupError: "usePoll" is not exported by "node_modules/@inertiajs/vue3/dist/index.esm.js", imported by "resources/js/Pages/Chatbots/Show.vue".
+    at error (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:2287:30)
+    at Module.error (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:13745:16)
+    at Module.traceVariable (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:14175:29)
+    at ModuleScope.findVariable (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:12615:39)
+    at FunctionScope.findVariable (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:7124:38)
+    at ChildScope.findVariable (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:7124:38)
+    at Identifier.bind (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:8319:40)
+    at CallExpression.bind (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:5892:23)
+    at CallExpression.bind (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:9890:15)
+    at ExpressionStatement.bind (file:///Users/franc/Herd/chatbots/node_modules/rollup/dist/es/shared/node-entry.js:5892:23)
