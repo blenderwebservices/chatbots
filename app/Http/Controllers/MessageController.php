@@ -57,7 +57,22 @@ class MessageController extends Controller
 
         $config = $llmModel->configuration ?? [];
 
-        return response()->eventStream(function () use ($chat, $llmModel, $provider, $config) {
+        $baseUrl = $config['base_url'] ?? match ($providerIdentifier) {
+            'google' => config('prism.providers.gemini.url'),
+            'microsoft' => config('prism.providers.openai.url'),
+            default => config("prism.providers.{$providerIdentifier}.url") ?? config('prism.providers.openai.url'),
+        };
+
+        $endpoint = match ($providerIdentifier) {
+            'google' => "/{$llmModel->identifier}:streamGenerateContent",
+            default => "/chat/completions",
+        };
+
+        $fullUrl = rtrim($baseUrl, '/') . $endpoint;
+
+        return response()->eventStream(function () use ($chat, $llmModel, $provider, $config, $fullUrl) {
+            yield ['delta' => "[API URL: {$fullUrl}]\n\n"];
+
             $prismRequest = Prism::text()
                 ->using($provider, $llmModel->identifier, array_filter([
                     'api_key' => $llmModel->api_key,
@@ -73,7 +88,20 @@ class MessageController extends Controller
                     ]);
                 });
 
-            return $prismRequest->asStream();
+            foreach ($prismRequest->asStream() as $chunk) {
+                // Ensure the chunk is serialized as an array if it's a Prism StreamEvent
+                yield $chunk instanceof \Prism\Prism\Streaming\Events\StreamEvent ? $chunk->toArray() : $chunk;
+
+                if ($chunk instanceof \Prism\Prism\Streaming\Events\StreamEndEvent) {
+                    $metadata = "\n---";
+                    $metadata .= "\n[Finish Reason: {$chunk->finishReason->name}]";
+                    if ($chunk->usage) {
+                        $totalTokens = $chunk->usage->promptTokens + $chunk->usage->completionTokens;
+                        $metadata .= "\n[Tokens: P:{$chunk->usage->promptTokens} | C:{$chunk->usage->completionTokens} | T:{$totalTokens}]";
+                    }
+                    yield ['delta' => $metadata];
+                }
+            }
         });
     }
 
