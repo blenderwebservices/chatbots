@@ -53,6 +53,7 @@ class LlmService
             return [
                 'status' => 'success',
                 'message' => 'Connection successful',
+                'execution_string' => $this->generateCurlCommand($llmModel),
             ];
 
         } catch (Exception $e) {
@@ -66,7 +67,45 @@ class LlmService
             return [
                 'status' => 'error',
                 'message' => 'Connection failed: ' . $e->getMessage(),
+                'execution_string' => $this->generateCurlCommand($llmModel),
             ];
         }
+    }
+
+    /**
+     * Generate a curl command representation for the connection check.
+     */
+    protected function generateCurlCommand(LlmModel $llmModel): string
+    {
+        $providerIdentifier = $llmModel->providerRelation->identifier;
+        $config = $llmModel->configuration ?? [];
+        $apiKey = $llmModel->api_key ?: 'MISSING_API_KEY';
+        $baseUrl = $config['base_url'] ?? null;
+        $model = $llmModel->identifier;
+
+        return match ($providerIdentifier) {
+            'microsoft', 'openai' => sprintf(
+                "curl %s/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization: Bearer %s\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}],\n    \"max_tokens\": 5\n  }'",
+                $baseUrl ?: 'https://api.openai.com/v1',
+                $apiKey,
+                $model
+            ),
+            'google' => sprintf(
+                "curl \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"contents\": [{\"parts\": [{\"text\": \"Hello\"}]}]\n  }'",
+                $model,
+                $apiKey
+            ),
+            'anthropic' => sprintf(
+                "curl https://api.anthropic.com/v1/messages \\\n  -H \"x-api-key: %s\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"max_tokens\": 5,\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]\n  }'",
+                $apiKey,
+                $model
+            ),
+            'groq' => sprintf(
+                "curl https://api.groq.com/openai/v1/chat/completions \\\n  -H \"Authorization: Bearer %s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}],\n    \"model\": \"%s\"\n  }'",
+                $apiKey,
+                $model
+            ),
+            default => "Comando curl no disponible para este proveedor ($providerIdentifier).",
+        };
     }
 }

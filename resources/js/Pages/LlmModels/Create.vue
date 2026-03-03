@@ -25,6 +25,7 @@ const form = useForm({
 
 const checkStatus = ref(null) // 'success', 'error', or null
 const checkMessage = ref('')
+const executionString = ref('')
 const isChecking = ref(false)
 
 const checkConnection = async () => {
@@ -62,12 +63,17 @@ const checkConnection = async () => {
       checkStatus.value = 'error'
       checkMessage.value = data.message
     }
+    executionString.value = data.execution_string || ''
   } catch (error) {
     checkStatus.value = 'error'
     checkMessage.value = 'Error al verificar la conexión'
   } finally {
     isChecking.value = false
   }
+}
+
+const copyExecutionString = () => {
+  navigator.clipboard.writeText(executionString.value)
 }
 
 const submit = () => {
@@ -168,6 +174,23 @@ const submit = () => {
 
           <div v-if="checkStatus" class="mt-3 p-3 rounded-lg" :class="checkStatus === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'">
             <p class="text-sm font-medium">{{ checkMessage }}</p>
+          </div>
+
+          <div v-if="executionString" class="mt-4">
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Comando de ejecución:</p>
+            <div class="relative group">
+              <pre class="p-4 bg-gray-900 text-gray-300 rounded-xl overflow-x-auto text-[10px] font-mono border border-gray-700 shadow-inner"><code>{{ executionString }}</code></pre>
+              <button 
+                type="button"
+                @click="copyExecutionString"
+                class="absolute top-2 right-2 p-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Copiar comando"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
