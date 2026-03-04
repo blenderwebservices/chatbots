@@ -64,6 +64,8 @@ class ChatController extends Controller
      */
     public function edit(Chat $chat)
     {
+        $chat->load('chatbot.llmModel.providerRelation');
+
         return Inertia::render('Chats/Edit', [
             'chat' => $chat,
             'messages' => $chat->messages()->oldest()->get(),

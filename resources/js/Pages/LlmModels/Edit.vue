@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { useForm, Link } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import TextInput from '@/Components/TextInput.vue'
 import InputError from '@/Components/InputError.vue'
@@ -24,8 +24,33 @@ const form = useForm({
 
 const checkStatus = ref(null)
 const checkMessage = ref('')
-const executionString = ref('')
 const isChecking = ref(false)
+
+const currentExecutionString = computed(() => {
+  const provider = props.providers.find(p => p.id === form.provider_id)
+  const providerIdentifier = provider ? provider.identifier : ''
+  const apiKey = form.api_key || 'MISSING_API_KEY'
+  const model = form.identifier || 'MODEL_ID'
+  const baseUrl = form.configuration.base_url
+
+  if (providerIdentifier === 'google') {
+    return `curl "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "contents": [{"parts": [{"text": "Hello"}]}]\n  }'`
+  }
+
+  if (providerIdentifier === 'openai' || providerIdentifier === 'microsoft') {
+    return `curl ${baseUrl || 'https://api.openai.com/v1'}/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer ${apiKey}" \\\n  -d '{\n    "model": "${model}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "max_tokens": 5\n  }'`
+  }
+
+  if (providerIdentifier === 'anthropic') {
+    return `curl https://api.anthropic.com/v1/messages \\\n  -H "x-api-key: ${apiKey}" \\\n  -H "anthropic-version: 2023-06-01" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${model}",\n    "max_tokens": 5,\n    "messages": [{"role": "user", "content": "Hello"}]\n  }'`
+  }
+
+  if (providerIdentifier === 'groq') {
+    return `curl https://api.groq.com/openai/v1/chat/completions \\\n  -H "Authorization: Bearer ${apiKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "messages": [{"role": "user", "content": "Hello"}],\n    "model": "${model}"\n  }'`
+  }
+
+  return providerIdentifier ? `Comando curl no disponible para este proveedor (${providerIdentifier}).` : 'Seleccione un proveedor para ver el comando.'
+})
 
 const checkConnection = async () => {
   if (!form.api_key) {
@@ -62,7 +87,6 @@ const checkConnection = async () => {
       checkStatus.value = 'error'
       checkMessage.value = data.message
     }
-    executionString.value = data.execution_string || ''
   } catch (error) {
     checkStatus.value = 'error'
     checkMessage.value = 'Error al verificar la conexión'
@@ -72,7 +96,7 @@ const checkConnection = async () => {
 }
 
 const copyExecutionString = () => {
-  navigator.clipboard.writeText(executionString.value)
+  navigator.clipboard.writeText(currentExecutionString.value)
 }
 
 const submit = () => {
@@ -172,10 +196,10 @@ const submit = () => {
             <p class="text-sm font-medium">{{ checkMessage }}</p>
           </div>
 
-          <div v-if="executionString" class="mt-4">
+          <div class="mt-4">
             <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Comando de ejecución:</p>
             <div class="relative group">
-              <pre class="p-4 bg-gray-900 text-gray-300 rounded-xl overflow-x-auto text-[10px] font-mono border border-gray-700 shadow-inner"><code>{{ executionString }}</code></pre>
+              <pre class="p-4 bg-gray-900 text-gray-300 rounded-xl overflow-x-auto text-[10px] font-mono border border-gray-700 shadow-inner"><code>{{ currentExecutionString }}</code></pre>
               <button 
                 type="button"
                 @click="copyExecutionString"

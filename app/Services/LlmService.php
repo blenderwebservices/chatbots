@@ -20,7 +20,7 @@ class LlmService
     {
         try {
             $providerIdentifier = $llmModel->providerRelation->identifier;
-            
+
             // Map internal provider identifiers to Prism Provider enum values
             // Currently supporting OpenAI and Gemini as per existing logic, but made generic
             $provider = match ($providerIdentifier) {
@@ -75,7 +75,7 @@ class LlmService
     /**
      * Generate a curl command representation for the connection check.
      */
-    protected function generateCurlCommand(LlmModel $llmModel): string
+    public function generateCurlCommand(LlmModel $llmModel, array $messages = []): string
     {
         $providerIdentifier = $llmModel->providerRelation->identifier;
         $config = $llmModel->configuration ?? [];
@@ -83,26 +83,41 @@ class LlmService
         $baseUrl = $config['base_url'] ?? null;
         $model = $llmModel->identifier;
 
+        // Use the last message content if available, otherwise default to "Hello"
+        $prompt = 'Hello';
+        if (!empty($messages)) {
+            $lastMessage = end($messages);
+            if ($lastMessage instanceof \Prism\Prism\ValueObjects\Messages\UserMessage) {
+                $prompt = $lastMessage->content;
+            } elseif (is_array($lastMessage) && isset($lastMessage['content'])) {
+                $prompt = $lastMessage['content'];
+            }
+        }
+
         return match ($providerIdentifier) {
             'microsoft', 'openai' => sprintf(
-                "curl %s/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization: Bearer %s\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}],\n    \"max_tokens\": 5\n  }'",
+                "curl %s/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization: Bearer %s\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}],\n    \"max_tokens\": 5\n  }'",
                 $baseUrl ?: 'https://api.openai.com/v1',
                 $apiKey,
-                $model
+                $model,
+                addslashes($prompt)
             ),
             'google' => sprintf(
-                "curl \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"contents\": [{\"parts\": [{\"text\": \"Hello\"}]}]\n  }'",
+                "curl \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"contents\": [{\"parts\": [{\"text\": \"%s\"}]}]\n  }'",
                 $model,
-                $apiKey
+                $apiKey,
+                addslashes($prompt)
             ),
             'anthropic' => sprintf(
-                "curl https://api.anthropic.com/v1/messages \\\n  -H \"x-api-key: %s\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"max_tokens\": 5,\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]\n  }'",
+                "curl https://api.anthropic.com/v1/messages \\\n  -H \"x-api-key: %s\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"%s\",\n    \"max_tokens\": 5,\n    \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}]\n  }'",
                 $apiKey,
-                $model
+                $model,
+                addslashes($prompt)
             ),
             'groq' => sprintf(
-                "curl https://api.groq.com/openai/v1/chat/completions \\\n  -H \"Authorization: Bearer %s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}],\n    \"model\": \"%s\"\n  }'",
+                "curl https://api.groq.com/openai/v1/chat/completions \\\n  -H \"Authorization: Bearer %s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}],\n    \"model\": \"%s\"\n  }'",
                 $apiKey,
+                addslashes($prompt),
                 $model
             ),
             default => "Comando curl no disponible para este proveedor ($providerIdentifier).",
