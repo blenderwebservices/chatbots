@@ -40,39 +40,44 @@ class MessageController extends Controller
             'content' => $request->message,
         ]);
 
-        $llmModel = $chat->chatbot->llmModel;
-
-        if (!$llmModel) {
-            throw new \Exception('No LLM model configured for this chatbot');
-        }
-
-        $providerIdentifier = $llmModel->providerRelation->identifier;
-
-        // Map internal provider identifiers to Prism Provider enum values
-        $provider = match ($providerIdentifier) {
-            'google' => Provider::Gemini,
-            'microsoft' => Provider::OpenAI,
-            default => Provider::tryFrom($providerIdentifier) ?? Provider::OpenAI,
-        };
-
-        $config = $llmModel->configuration ?? [];
-
-        $baseUrl = $config['base_url'] ?? match ($providerIdentifier) {
-            'google' => config('prism.providers.gemini.url'),
-            'microsoft' => config('prism.providers.openai.url'),
-            default => config("prism.providers.{$providerIdentifier}.url") ?? config('prism.providers.openai.url'),
-        };
-
-        $endpoint = match ($providerIdentifier) {
-            'google' => "/{$llmModel->identifier}:streamGenerateContent",
-            default => "/chat/completions",
-        };
-
-        $fullUrl = rtrim($baseUrl, '/') . $endpoint;
-
-        return response()->eventStream(function () use ($chat, $llmModel, $provider, $config, $fullUrl) {
+        return response()->eventStream(function () use ($chat) {
+            $llmModel = $chat->chatbot?->llmModel;
             $messages = [];
+
             try {
+                if (!$llmModel) {
+                    throw new \Exception('No LLM model configured for this chatbot');
+                }
+
+                $providerRelation = $llmModel->providerRelation;
+                if (!$providerRelation) {
+                    throw new \Exception('No provider configured for the selected LLM model');
+                }
+
+                $providerIdentifier = $providerRelation->identifier;
+
+                // Map internal provider identifiers to Prism Provider enum values
+                $provider = match ($providerIdentifier) {
+                    'google' => Provider::Gemini,
+                    'microsoft' => Provider::OpenAI,
+                    default => Provider::tryFrom($providerIdentifier) ?? Provider::OpenAI,
+                };
+
+                $config = $llmModel->configuration ?? [];
+
+                $baseUrl = $config['base_url'] ?? match ($providerIdentifier) {
+                    'google' => config('prism.providers.gemini.url'),
+                    'microsoft' => config('prism.providers.openai.url'),
+                    default => config("prism.providers.{$providerIdentifier}.url") ?? config('prism.providers.openai.url'),
+                };
+
+                $endpoint = match ($providerIdentifier) {
+                    'google' => "/{$llmModel->identifier}:streamGenerateContent",
+                    default => "/chat/completions",
+                };
+
+                $fullUrl = rtrim((string) $baseUrl, '/') . $endpoint;
+
                 yield ['delta' => "[API URL: {$fullUrl}]\n\n"];
 
                 $messages = $chat->getPrismMessages();
@@ -86,9 +91,10 @@ class MessageController extends Controller
                     ->usingTemperature($chat->chatbot->temperature)
                     ->withMessages($messages)
                     ->onComplete(function ($pendingRequest, $messages) use ($chat) {
+                        $assistantMessage = $messages->first();
                         $chat->messages()->create([
                             'role' => 'assistant',
-                            'content' => $messages->first()->content,
+                            'content' => $assistantMessage ? $assistantMessage->content : '',
                         ]);
                     });
 
@@ -107,8 +113,13 @@ class MessageController extends Controller
                     }
                 }
             } catch (\Exception $e) {
+                \Log::error("Chat API Error: " . $e->getMessage(), [
+                    'chat_id' => $chat->id,
+                    'exception' => $e
+                ]);
+
                 $llmService = new \App\Services\LlmService();
-                $executionString = $llmService->generateCurlCommand($llmModel, $messages);
+                $executionString = $llmModel ? $llmService->generateCurlCommand($llmModel, $messages) : 'No se pudo generar el comando curl.';
 
                 yield [
                     'event' => 'llm-error',

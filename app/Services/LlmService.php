@@ -77,11 +77,12 @@ class LlmService
      */
     public function generateCurlCommand(LlmModel $llmModel, array $messages = []): string
     {
-        $providerIdentifier = $llmModel->providerRelation->identifier;
+        $providerRelation = $llmModel->providerRelation;
+        $providerIdentifier = $providerRelation ? $providerRelation->identifier : ($llmModel->provider ?? 'unknown');
         $config = $llmModel->configuration ?? [];
         $apiKey = $llmModel->api_key ?: 'MISSING_API_KEY';
         $baseUrl = $config['base_url'] ?? null;
-        $model = $llmModel->identifier;
+        $model = $llmModel->identifier ?? 'unknown';
 
         // Use the last message content if available, otherwise default to "Hello"
         $prompt = 'Hello';
