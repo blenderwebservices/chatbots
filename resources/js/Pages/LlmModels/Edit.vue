@@ -34,7 +34,7 @@ const currentExecutionString = computed(() => {
   const baseUrl = form.configuration.base_url
 
   if (providerIdentifier === 'google') {
-    return `curl "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "contents": [{"parts": [{"text": "Hello"}]}]\n  }'`
+    return `curl "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "contents": [{"parts": [{"text": "Hello"}]}],\n    "tools": [{\n      \"google_search\": {}\n    }]\n  }'`
   }
 
   if (providerIdentifier === 'openai' || providerIdentifier === 'microsoft') {

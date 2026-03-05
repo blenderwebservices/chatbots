@@ -104,7 +104,7 @@ class LlmService
                 addslashes($prompt)
             ),
             'google' => sprintf(
-                "curl \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"contents\": [{\"parts\": [{\"text\": \"%s\"}]}]\n  }'",
+                "curl \"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"contents\": [{\"parts\": [{\"text\": \"%s\"}]}],\n    \"tools\": [{\n      \"google_search\": {}\n    }]\n  }'",
                 $model,
                 $apiKey,
                 addslashes($prompt)

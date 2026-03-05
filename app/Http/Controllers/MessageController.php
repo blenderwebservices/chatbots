@@ -8,6 +8,7 @@ use App\Models\Chat;
 use App\Models\Message;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
+use Illuminate\Http\StreamedEvent;
 
 class MessageController extends Controller
 {
@@ -81,6 +82,7 @@ class MessageController extends Controller
                 yield ['delta' => "[API URL: {$fullUrl}]\n\n"];
 
                 $messages = $chat->getPrismMessages();
+                $assistantContent = '';
 
                 $prismRequest = Prism::text()
                     ->using($provider, $llmModel->identifier, array_filter([
@@ -90,15 +92,19 @@ class MessageController extends Controller
                     ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
                     ->usingTemperature($chat->chatbot->temperature)
                     ->withMessages($messages)
-                    ->onComplete(function ($pendingRequest, $messages) use ($chat) {
+                    ->onComplete(function ($pendingRequest, $messages) use ($chat, &$assistantContent) {
+                        // If we already saved partial content, we don't want to create a second message
+                        // but usually Prism replaces the whole content in onComplete messages.
+                        // However, our custom loop below handles saving if onComplete doesn't fire.
                         $assistantMessage = $messages->first();
-                        $chat->messages()->create([
-                            'role' => 'assistant',
-                            'content' => $assistantMessage ? $assistantMessage->content : '',
-                        ]);
+                        $assistantContent = $assistantMessage ? $assistantMessage->content : '';
                     });
 
                 foreach ($prismRequest->asStream() as $chunk) {
+                    if ($chunk instanceof \Prism\Prism\Streaming\Events\TextDeltaEvent) {
+                        $assistantContent .= $chunk->delta;
+                    }
+
                     // Ensure the chunk is serialized as an array if it's a Prism StreamEvent
                     yield $chunk instanceof \Prism\Prism\Streaming\Events\StreamEvent ? $chunk->toArray() : $chunk;
 
@@ -112,22 +118,34 @@ class MessageController extends Controller
                         yield ['delta' => $metadata];
                     }
                 }
-            } catch (\Exception $e) {
+
+                if (!empty($assistantContent)) {
+                    $chat->messages()->create([
+                        'role' => 'assistant',
+                        'content' => $assistantContent,
+                    ]);
+                }
+            } catch (\Throwable $e) {
                 \Log::error("Chat API Error: " . $e->getMessage(), [
                     'chat_id' => $chat->id,
                     'exception' => $e
                 ]);
 
+                // Save partial content even on error if any was received
+                if (!empty($assistantContent)) {
+                    $chat->messages()->create([
+                        'role' => 'assistant',
+                        'content' => $assistantContent,
+                    ]);
+                }
+
                 $llmService = new \App\Services\LlmService();
                 $executionString = $llmModel ? $llmService->generateCurlCommand($llmModel, $messages) : 'No se pudo generar el comando curl.';
 
-                yield [
-                    'event' => 'llm-error',
-                    'data' => json_encode([
-                        'message' => $e->getMessage(),
-                        'execution_string' => $executionString,
-                    ])
-                ];
+                yield new StreamedEvent('llm-error', json_encode([
+                    'message' => $e->getMessage(),
+                    'execution_string' => $executionString,
+                ]));
             }
         });
     }
