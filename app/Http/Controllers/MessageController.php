@@ -87,7 +87,7 @@ class MessageController extends Controller
                 $prismRequest = Prism::text()
                     ->using($provider, $llmModel->identifier, array_filter([
                         'api_key' => $llmModel->api_key,
-                        'url' => $config['base_url'] ?? null,
+                        'url' => $baseUrl ?: null,
                     ]))
                     ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
                     ->usingTemperature($chat->chatbot->temperature)
