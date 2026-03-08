@@ -76,26 +76,29 @@ const parser = createParser({
     if (event.event === 'llm-error') {
       try {
         const errorData = JSON.parse(event.data)
-        errorMessage.value = errorData.message
-        errorExecutionString.value = errorData.execution_string
+        errorMessage.value = errorData.message || 'Error del proveedor.'
         executionStatus.value = 'error'
+        return
       } catch (e) {
-        errorMessage.value = 'Error al procesar los datos de error del servidor.'
+        // Fall through
       }
-      return
     }
 
     try {
       const data = JSON.parse(event.data)
-      // Prism uses 'delta' in toArray() for TextDeltaEvent, 
-      // but let's be flexible and support common variations
-      const text = data.delta || data.text_delta || data.textDelta
-      
-      if (text !== undefined) {
-        assistantMessage.value += text
+
+      // Handle error type explicitly to avoid false positives in text content
+      if (data.type === 'error') {
+        errorMessage.value = data.message || 'Error del proveedor.'
+        executionStatus.value = 'error'
+        return
+      }
+
+      if (data.type === 'text-delta' || data.type === 'text_delta') {
+        assistantMessage.value += data.delta
       }
     } catch (e) {
-      // Ignore parsing errors for individual chunks if they are not JSON
+      // Not JSON or other parsing error, ignore as it might be raw stream noise
     }
   },
 })

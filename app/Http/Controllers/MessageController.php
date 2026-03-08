@@ -79,7 +79,7 @@ class MessageController extends Controller
 
                 $fullUrl = rtrim((string) $baseUrl, '/') . $endpoint;
 
-                yield ['delta' => "[API URL: {$fullUrl}]\n\n"];
+                yield ['type' => 'text-delta', 'delta' => "[API URL: {$fullUrl}]\n\n"];
 
                 $messages = $chat->getPrismMessages();
                 $assistantContent = '';
@@ -91,22 +91,25 @@ class MessageController extends Controller
                     ]))
                     ->withSystemPrompt($chat->chatbot->buildSystemPrompt())
                     ->usingTemperature($chat->chatbot->temperature)
-                    ->withMessages($messages)
-                    ->onComplete(function ($pendingRequest, $messages) use ($chat, &$assistantContent) {
-                        // If we already saved partial content, we don't want to create a second message
-                        // but usually Prism replaces the whole content in onComplete messages.
-                        // However, our custom loop below handles saving if onComplete doesn't fire.
-                        $assistantMessage = $messages->first();
-                        $assistantContent = $assistantMessage ? $assistantMessage->content : '';
-                    });
+                    ->withMessages($messages);
 
                 foreach ($prismRequest->asStream() as $chunk) {
                     if ($chunk instanceof \Prism\Prism\Streaming\Events\TextDeltaEvent) {
                         $assistantContent .= $chunk->delta;
                     }
 
-                    // Ensure the chunk is serialized as an array if it's a Prism StreamEvent
-                    yield $chunk instanceof \Prism\Prism\Streaming\Events\StreamEvent ? $chunk->toArray() : $chunk;
+                    // Add type explicitly for the frontend parser
+                    $data = $chunk instanceof \Prism\Prism\Streaming\Events\StreamEvent ? $chunk->toArray() : $chunk;
+
+                    if ($chunk instanceof \Prism\Prism\Streaming\Events\TextDeltaEvent) {
+                        $data['type'] = 'text-delta'; // Matching hyphen in Edit.vue
+                    } elseif ($chunk instanceof \Prism\Prism\Streaming\Events\StreamEndEvent) {
+                        $data['type'] = 'stream-end';
+                    } elseif ($chunk instanceof \Prism\Prism\Streaming\Events\ErrorEvent) {
+                        $data['type'] = 'error';
+                    }
+
+                    yield $data;
 
                     if ($chunk instanceof \Prism\Prism\Streaming\Events\StreamEndEvent) {
                         $metadata = "\n---";
@@ -115,7 +118,7 @@ class MessageController extends Controller
                             $totalTokens = $chunk->usage->promptTokens + $chunk->usage->completionTokens;
                             $metadata .= "\n[Tokens: P:{$chunk->usage->promptTokens} | C:{$chunk->usage->completionTokens} | T:{$totalTokens}]";
                         }
-                        yield ['delta' => $metadata];
+                        yield ['type' => 'text-delta', 'delta' => $metadata];
                     }
                 }
 
@@ -124,6 +127,8 @@ class MessageController extends Controller
                         'role' => 'assistant',
                         'content' => $assistantContent,
                     ]);
+                    // Clear to avoid double saving in catch if something happens later
+                    $assistantContent = '';
                 }
             } catch (\Throwable $e) {
                 \Log::error("Chat API Error: " . $e->getMessage(), [
